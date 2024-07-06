@@ -1,17 +1,19 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('./db'); // Your Sequelize instance
+const { Model, DataTypes, Sequelize } = require('sequelize');
+const sequelize = require('../config'); // Your Sequelize instance
 
 class Organisation extends Model {}
 
 Organisation.init({
   orgId: {
-    type: DataTypes.UUIDV4,
-    primaryKey: true,
+    type: DataTypes.STRING,
+    defaultValue: Sequelize.UUIDV4,
+    primarKey: true,
     unique: true
   },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
+    require: true,
     validate: {
         notNull: {
           msg: 'Please enter your name',
@@ -22,7 +24,7 @@ Organisation.init({
     }
   },
   description: {
-    type: DataTypes.TEXT
+    type: DataTypes.STRING
   }
 }, {
   sequelize,

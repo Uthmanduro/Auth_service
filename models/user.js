@@ -1,4 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
+const Organisation = require('./organisation');
+const UserOrganisation = require('./userOrganisation');
+const bcrypt = require('bcryptjs');
 const sequelize = require('../config');
 
 const User = sequelize.define(
@@ -6,7 +9,8 @@ const User = sequelize.define(
   {
     // Model attributes are defined here
     userId: {
-        type: DataTypes.UUIDV4,
+        type: DataTypes.STRING,
+        defaultValue: Sequelize.UUIDV4,
         primarKey: true,
         unique: true
     },
@@ -47,7 +51,7 @@ const User = sequelize.define(
             }
         }
     }, // must be unique and must not be null
-	passwordHash : {
+	password : {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
@@ -64,9 +68,24 @@ const User = sequelize.define(
     }
   },
   {
-    sequelize// Other model options go here
-  },
+    sequelize,// Other model options go here
+    hooks: {
+        beforeCreate: async (user, options) => {
+            if (user.password) {
+                const salt = await bcrypt.genSalt(10);
+                user.password = await bcrypt.hash(user.password, salt);
+            }
+        }
+    }
+  }
 );
+
+
+//define associations
+User.belongsToMany(Organisation, { through: UserOrganisation, foreignKey: 'userId' });
+Organisation.belongsToMany(User, { through: UserOrganisation, foreignKey: 'orgId' });
+
+
 
 // `sequelize.define` also returns the model
 console.log(User === sequelize.models.User); // true
