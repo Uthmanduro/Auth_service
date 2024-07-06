@@ -1,0 +1,47 @@
+const express = require('express');
+require('dotenv').config();
+const sequelize = require('./config.js');
+
+const app = express();
+const port = process.env.PORT || 8000;
+
+
+//define associations
+User.belongsToMany(Organization, { through: UserOrganisation, foreignKey: 'userId' });
+Organization.belongsToMany(User, { through: UserOrganisation, foreignKey: 'orgId' });
+
+
+// Sync database
+sequelize.sync();
+
+app.listen(port, () => {
+    console.log(`App is listening on port ${port}`)
+});
+
+
+
+const gracefulShutdown = async () => {
+    console.log('Received shutdown signal, shutting down gracefully...');
+    
+    // Close the server to stop accepting new connections
+    server.close(async (err) => {
+      if (err) {
+        console.error('Error closing server:', err);
+        process.exit(1);
+      }
+  
+      // Close the Sequelize connection
+      try {
+        await sequelize.close();
+        console.log('Sequelize connection closed gracefully.');
+        process.exit(0);
+      } catch (err) {
+        console.error('Error closing Sequelize connection:', err);
+        process.exit(1);
+      }
+    });
+  };
+  
+  // Listen for termination signals
+  process.on('SIGTERM', gracefulShutdown);
+  process.on('SIGINT', gracefulShutdown);
