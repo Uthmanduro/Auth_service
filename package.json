@@ -4,7 +4,8 @@
   "description": "create a user authentication microservice using sequelize orm",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "start": "node index.js",
+    "test": "npx jest tests/auth.spec.js"
   },
   "repository": {
     "type": "git",

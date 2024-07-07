@@ -24,28 +24,3 @@ app.listen(port, () => {
 
 
 module.exports = app;
-// const gracefulShutdown = async () => {
-//     console.log('Received shutdown signal, shutting down gracefully...');
-    
-//     // Close the server to stop accepting new connections
-//     server.close(async (err) => {
-//       if (err) {
-//         console.error('Error closing server:', err);
-//         process.exit(1);
-//       }
-  
-//       // Close the Sequelize connection
-//       try {
-//         await sequelize.close();
-//         console.log('Sequelize connection closed gracefully.');
-//         process.exit(0);
-//       } catch (err) {
-//         console.error('Error closing Sequelize connection:', err);
-//         process.exit(1);
-//       }
-//     });
-//   };
-  
-//   // Listen for termination signals
-//   process.on('SIGTERM', gracefulShutdown);
-//   process.on('SIGINT', gracefulShutdown);
