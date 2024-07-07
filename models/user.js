@@ -1,17 +1,15 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const Organisation = require('./organisation');
-const UserOrganisation = require('./userOrganisation');
+const { Model, Sequelize, DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
 const sequelize = require('../config');
 
-const User = sequelize.define(
-  'User',
-  {
+class User extends Model {}
+
+User.init({
     // Model attributes are defined here
     userId: {
         type: DataTypes.STRING,
         defaultValue: Sequelize.UUIDV4,
-        primarKey: true,
+        primaryKey: true,
         unique: true
     },
     firstName: {
@@ -22,7 +20,7 @@ const User = sequelize.define(
                 msg: 'Please enter your first name',
             },
             notEmpty: {
-                msg: 'firstname cannot be empty'
+                msg: 'Please enter your first name'
             }
         }
     },
@@ -34,7 +32,7 @@ const User = sequelize.define(
               msg: 'Please enter your last name',
             },
             notEmpty: {
-                msg: 'lastname cannot be empty'
+                msg: 'Please enter your last name'
             }
         }
     },
@@ -47,7 +45,7 @@ const User = sequelize.define(
               msg: 'Please enter your email',
             },
             notEmpty: {
-                msg: 'email cannot be empty'
+                msg: 'Please enter your email'
             }
         }
     }, // must be unique and must not be null
@@ -59,7 +57,7 @@ const User = sequelize.define(
               msg: 'Please enter your password',
             },
             notEmpty: {
-                msg: 'password cannot be empty'
+                msg: 'Please enter your password'
             }
         }
     }, // must not be null
@@ -69,6 +67,8 @@ const User = sequelize.define(
   },
   {
     sequelize,// Other model options go here
+    modelName: 'User', 
+    timestamps: false,
     hooks: {
         beforeCreate: async (user, options) => {
             if (user.password) {
@@ -81,12 +81,58 @@ const User = sequelize.define(
 );
 
 
-//define associations
-User.belongsToMany(Organisation, { through: UserOrganisation, foreignKey: 'userId' });
-Organisation.belongsToMany(User, { through: UserOrganisation, foreignKey: 'orgId' });
+class Organisation extends Model {}
+Organisation.init(
+    {
+      orgId: {
+        type: DataTypes.STRING,
+        defaultValue: Sequelize.UUIDV4,
+        primaryKey: true,
+        unique: true
+      },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        require: true,
+        validate: {
+            notNull: {
+              msg: 'Please enter your name',
+            },
+            notEmpty: {
+                msg: 'Please enter your name'
+            }
+        }
+      },
+      description: {
+        type: DataTypes.STRING
+      }
+    }, {
+        sequelize,
+        modelName: 'Organisation',
+        timestamps: false
+    }
+);
 
-
+const UserOrganisation = sequelize.define('UserOrganisation', {
+    userId: {
+      type: DataTypes.STRING,
+      references: {
+        model: User,
+        key: 'userId'
+      }
+    },
+    orgId: {
+      type: DataTypes.STRING,
+      references: {
+        model: Organisation,
+        key: 'orgId'
+      }
+    }
+  });
+  
+User.belongsToMany(Organisation, { through: UserOrganisation, foreignKey: 'usersId' });
+Organisation.belongsToMany(User, { through: UserOrganisation, foreignKey: 'orgsId' });
 
 // `sequelize.define` also returns the model
 console.log(User === sequelize.models.User); // true
-module.exports = User;
+module.exports = { User, Organisation, UserOrganisation };

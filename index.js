@@ -15,15 +15,7 @@ app.use(bodyParser.json());
 
 app.use(userRoute);
 
-// Sync the model with the database
-(async () => {
-  try {
-    await sequelize.sync();
-    console.log('Database synced successfully');
-  } catch (error) {
-    console.error('Database synchronization error:', error);
-  }
-})();
+
 
 
 app.listen(port, () => {
@@ -31,7 +23,7 @@ app.listen(port, () => {
 });
 
 
-
+module.exports = app;
 // const gracefulShutdown = async () => {
 //     console.log('Received shutdown signal, shutting down gracefully...');
     

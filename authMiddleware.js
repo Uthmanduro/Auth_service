@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const User = require("./models/user");
+const { User }= require("./models/user");
 const jwt = require("jsonwebtoken");
 
 const protect = asyncHandler(async (req, res, next) => {
@@ -22,7 +22,7 @@ const protect = asyncHandler(async (req, res, next) => {
 
         // Get user id from token
         const user = await User.findOne({ 
-            where: { userId: verified.id }
+            where: { userId: verified.userId }
         });
 
         if (!user) {

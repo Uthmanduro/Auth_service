@@ -1,16 +1,17 @@
 const asyncHandler = require('express-async-handler');
-const User = require('../models/user.js');
-const Organisation = require('../models/organisation.js');
-const UserOrganisation = require('../models/userOrganisation.js');
+const { User, Organisation, UserOrganisation } = require('../models/user.js');
+//const Organisation = require('../models/organisation.js');
+//const UserOrganisation = require('../models/userOrganisation.js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+//const UserOrganisation = require('../models/userOrganisation.js');
 require('dotenv').config()
 
 
 
-const generateToken = (id) => {
+const generateToken = (userId) => {
     // The payload of the JWT contains the user's id.
-    const payload = { id };
+    const payload = { userId };
   
     // The JWT is signed with the secret key.
     const secret = process.env.JWT_SECRET;
@@ -63,6 +64,13 @@ const registerUser = asyncHandler(async (req, res) => {
             description: ""
         });
 
+        await UserOrganisation.create({
+            usersId: newUser.userId,
+            orgsId: newOrg.orgId,
+            // other fields...
+          });
+
+
         res.status(201).json({
             "status": "success",
             "message": "Registration successful",
@@ -72,6 +80,7 @@ const registerUser = asyncHandler(async (req, res) => {
             }
         });
     } catch (error) {
+        console.error(error)
         if (error.name === 'SequelizeValidationError') {
             const errors = error.errors.map(err => ({
                 field: err.path,
@@ -147,6 +156,7 @@ const loginUser = asyncHandler(async (req, res) => {
             });
         }
     } catch (e) {
+        console.error(e);
         res.status(401).json({
             "status": "Bad request",
             "message": "Authentication failed",
@@ -156,7 +166,7 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const getUserById = asyncHandler(async (req, res) => {
-    const {id} = req.params;
+    const { id } = req.params;
     console.log(id)
 
     // Check if user exists by searching for mail in the DB
@@ -191,16 +201,19 @@ const getUserById = asyncHandler(async (req, res) => {
 const getOrgByUser = asyncHandler(async (req, res) => {
     try {
         const {userId} = req.user;
+        
+
+        //const organisations = await Organisation.findAll({include: User});
+
         const organisations = await Organisation.findAll({
-            attributes: ['orgId', 'name', 'description'],
             include: [{
               model: User,
-              through: {
-                model: UserOrganisation,
-                where: { userId }
-              }
-            }]
-        });
+              where : {userId},
+              attributes: []
+            }],
+            attributes: ['orgId', 'description', 'name']
+          });
+
 
         res.status(200).json({
             "status": "success",
@@ -243,6 +256,7 @@ const getOrgById = asyncHandler(async (req, res) => {
             "data": org
         })
     } catch (e) {
+        console.error(e);
         res.status(404).json({
             "status": "Bad request",
             "message": "Organisation not found",
@@ -271,12 +285,16 @@ const createOrg = asyncHandler(async (req, res) => {
             "description": org.description,
         }
 
+        await UserOrganisation.create({ 'usersId': req.user.userId, 'orgsId': orgData.orgId });
+        
+
         return res.status(201).json({
             "status": "success",
             "message": "Organisation created successfully",
             "data": orgData
         })
     } catch (e) {
+        console.error(e);
         res.status(400).json({
             "status": "Bad Request",
             "message": "Client error",
@@ -303,7 +321,7 @@ const addUserToOrg = asyncHandler(async (req, res) => {
         }
     
         // Add user to organization
-        await UserOrganisation.create({ userId, orgId });
+        await UserOrganisation.create({ usersId: userId, orgsId: orgId });
     
         res.status(201).json({
             "status": "success",
@@ -315,4 +333,4 @@ const addUserToOrg = asyncHandler(async (req, res) => {
 })
 
 
-module.exports = {registerUser, loginUser, getUserById, getOrgByUser, getOrgById, createOrg, addUserToOrg };
+module.exports = { registerUser, loginUser, getUserById, getOrgByUser, getOrgById, createOrg, addUserToOrg };
