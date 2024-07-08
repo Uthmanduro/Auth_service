@@ -1,10 +1,13 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
+const { pg } = require('pg');
 //const sequelize = new Sequelize('sqlite::memory:');
 
 
 
-const sequelize = new Sequelize(process.env.DB_URL) // Example for postgres
+const sequelize = new Sequelize(process.env.DB_URL, {
+  dialectModule: pg
+}) // Example for postgres
 
 // const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
 //   host: process.env.DB_HOST,
