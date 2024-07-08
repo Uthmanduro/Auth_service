@@ -5,8 +5,8 @@ const protect = require('../authMiddleware.js');
 
 
 
-router.post('/auth/register', registerUser);
-router.post("/auth/login", loginUser);
+router.post('/api/auth/register', registerUser);
+router.post("/api/auth/login", loginUser);
 router.get("/api/users/:id", protect, getUserById); // 
 router.get("/api/organisations", protect, getOrgByUser);
 router.get('/api/organisations/:orgId', protect, getOrgById);
